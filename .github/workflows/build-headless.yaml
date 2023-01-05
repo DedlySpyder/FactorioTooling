@@ -1,0 +1,59 @@
+name: Headless docker build, if needed
+on:
+  workflow_call:
+    inputs:
+      experimental:
+        description: 'Experimental Factorio version to build'
+        type: string
+      stable:
+        description: 'Stable Factorio version to build'
+        type: string
+  workflow_dispatch:
+    inputs:
+      experimental:
+        description: 'Experimental Factorio version to build'
+        type: string
+      stable:
+        description: 'Stable Factorio version to build'
+        type: string
+jobs:
+  setup:
+    steps:
+      - uses: actions/checkout@v3
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+  buildExperimental:
+    name: Experimental builder
+    needs: setup
+    runs-on: ubuntu-latest
+    if: inputs.experimental != ''
+    concurrency: headlessBuild
+    steps:
+      - id: vadliateExperimental
+        name: Validate experimental headless image
+        uses: ./.github/workflows/scripts/validate_docker_tag.sh # Outputs `exists` as true/false
+        shell: bash
+        with:
+          version: ${{ inputs.experimental }}
+      - uses: echo "${{ steps.vadliateExperimental.outputs.exists }}"
+  buildStable:
+    name: Stable builder
+    needs: setup
+    runs-on: ubuntu-latest
+    if: inputs.stable != ''
+    concurrency: headlessBuild
+    steps:
+      - id: vadliateStable
+        name: Validate stable headless image
+        uses: ./.github/workflows/scripts/validate_docker_tag.sh # Outputs `exists` as true/false
+        shell: bash
+        with:
+          version: ${{ inputs.stable }}
+      - uses: echo "${{ steps.vadliateStable.outputs.exists }}"
+
+
+# https://docs.docker.com/build/ci/github-actions/examples/
+# https://github.com/marketplace/actions/build-and-push-docker-images#path-context
