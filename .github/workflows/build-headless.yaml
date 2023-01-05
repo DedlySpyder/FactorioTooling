@@ -38,7 +38,7 @@ jobs:
         shell: bash
         with:
           version: ${{ inputs.experimental }}
-      - uses: echo "${{ steps.vadliateExperimental.outputs.exists }}"
+      - run: echo "${{ steps.vadliateExperimental.outputs.exists }}"
   buildStable:
     name: Stable builder
     needs: setup
@@ -52,7 +52,7 @@ jobs:
         shell: bash
         with:
           version: ${{ inputs.stable }}
-      - uses: echo "${{ steps.vadliateStable.outputs.exists }}"
+      - run: echo "${{ steps.vadliateStable.outputs.exists }}"
 
 
 # https://docs.docker.com/build/ci/github-actions/examples/
